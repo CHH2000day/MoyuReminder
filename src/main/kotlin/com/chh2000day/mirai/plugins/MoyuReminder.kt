@@ -188,7 +188,7 @@ object MoyuReminder : KotlinPlugin(
                 it.second
             }
             val stringToSend = buildString {
-                append("【摸鱼办】提醒您：${currentDate.monthNumber}${currentDate.dayOfMonth}日上午好，摸鱼人！工作再累，一定不要忘记摸鱼哦！有事没事起身去茶水间，去厕所，去廊道走走别老在工位上坐着，钱是老板的,但命是自己的")
+                append("【摸鱼办】提醒您：${currentDate.monthNumber}月${currentDate.dayOfMonth}日上午好，摸鱼人！工作再累，一定不要忘记摸鱼哦！有事没事起身去茶水间，去厕所，去廊道走走别老在工位上坐着，钱是老板的,但命是自己的")
                 append("\n")
                 targetFestivalList.forEach {
                     append("距${it.first}还有:${it.second}天\n")
