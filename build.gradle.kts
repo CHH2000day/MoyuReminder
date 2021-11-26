@@ -30,7 +30,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 dependencies {
-
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
 }
 
 afterEvaluate {
