@@ -62,7 +62,7 @@ data class Festival(val name: String, val time: String) {
             //MMDD
             4 -> {
                 val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                yearInt = currentDate.monthNumber
+                yearInt = currentDate.year
                 val monthStr = digits.substring(0, 2)
                 val dayStr = digits.substring(2, 4)
                 monthInt = monthStr.toInt()
