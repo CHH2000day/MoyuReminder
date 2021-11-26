@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.chh2000day.mirai.plugins"
-version = "0.1.0-dev-1"
+version = "0.1.0"
 
 repositories {
     maven("https://maven.aliyun.com/repository/public")
@@ -26,11 +26,11 @@ repositories {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "16"
+    kotlinOptions.jvmTarget = "11"
 }
 
 dependencies {
-
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
 }
 
 afterEvaluate {
