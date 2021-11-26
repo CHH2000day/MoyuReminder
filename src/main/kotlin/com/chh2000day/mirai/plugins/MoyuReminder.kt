@@ -83,7 +83,7 @@ object MoyuReminder : KotlinPlugin(
             }
             //计算时间差
             val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-            val sendTime = with(currentTime) {
+            var sendTime = with(currentTime) {
                 LocalDateTime(
                     year,
                     monthNumber,
@@ -100,9 +100,10 @@ object MoyuReminder : KotlinPlugin(
             //至少离任务启动还有[startUpDelay]时间再启动任务
             if (timeDiff < startUpDelay) {
                 timeDiff += millisecondsPerDay
+                sendTime = sendTime.plus(Duration.Companion.days(1))
             }
             timer.schedule(Worker(singleConfig), timeDiff, millisecondsPerDay)
-            logger.info("下次运行任务${singleConfig}的时间:${sendTime.plus(Duration.Companion.days(1))}")
+            logger.info("下次运行任务${singleConfig}的时间:${sendTime}")
         }
     }
 
