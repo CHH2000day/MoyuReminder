@@ -102,7 +102,7 @@ object MoyuReminder : KotlinPlugin(
                 timeDiff += millisecondsPerDay
                 sendTime = sendTime.plus(Duration.Companion.days(1))
             }
-            timer.schedule(Worker(singleConfig), timeDiff, millisecondsPerDay)
+            timer.scheduleAtFixedRate(Worker(singleConfig), timeDiff, millisecondsPerDay)
             logger.info("下次运行任务${singleConfig}的时间:${sendTime}")
         }
     }
