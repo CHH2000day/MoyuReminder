@@ -55,7 +55,7 @@ afterEvaluate {
             """
             author: CHH2000day
             info: 喵帕斯~都已经这个点了还不坐下来悠哉悠哉地摸鱼吗
-            dependencies: []
+            dependencies: [ ]
         """.trimIndent()
         )
         append("\n")
