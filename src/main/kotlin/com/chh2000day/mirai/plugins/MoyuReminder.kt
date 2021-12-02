@@ -170,7 +170,7 @@ object MoyuReminder : KotlinPlugin(
             }
 
             val festivalToShowList = findAllFestivalsToShow(currentDate)
-            val mainContent = parseMainContent(festivalToShowList)
+            val mainContent = parseMainContent(festivalToShowList).trimEnd()
             val stringToSend = singleConfig.template.parseTemplate {
                 //大小写不敏感
                 when (it) {
