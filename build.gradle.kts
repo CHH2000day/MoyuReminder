@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "com.chh2000day.mirai.plugins"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     maven("https://maven.aliyun.com/repository/public")
@@ -31,8 +31,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
-
+tasks.test {
+    useJUnitPlatform()
+}
 afterEvaluate {
     //写入插件信息
     val pluginConfigFile = File("src/main/resources/plugin.yml")

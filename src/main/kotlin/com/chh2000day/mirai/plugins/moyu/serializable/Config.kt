@@ -32,12 +32,19 @@ data class Config(val subConfigs: List<SingleConfig>)
  * @param maxNumOfDaysExceed 最大允许已超过节假日多少天(发送)
  * @param maxNumOfDaysPrior 最大允许离节假日多少天(发送)
  * @param interval 每条信息之间的发送间隔
+ * @param template 模板,支持以下功能:
+ *                  {content} 正文(距XX还有XX天)
+ *                  {month} 当前月份
+ *                  {dayOfMonth} 当前日
+ *                  {dayOfWeek} 周X
+ *                  {dayOfYear} 今年的第X天
  */
 @Serializable
 data class SingleConfig(
     val groupList: List<Long>,
     val festivalList: List<Festival>,
     val sendTime: String,
+    val template: String = "{content}",
     val maxNumOfDaysExceed: Int = 0,
     val maxNumOfDaysPrior: Int = 300,
     val interval: Long = 3000
