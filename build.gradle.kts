@@ -31,7 +31,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
-    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 tasks.test {
     useJUnitPlatform()
