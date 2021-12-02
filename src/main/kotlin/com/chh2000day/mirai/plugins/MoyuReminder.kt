@@ -32,12 +32,15 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 typealias JVMDayOfWeek = java.time.DayOfWeek
+typealias FestivalDeltaInfo = Pair<String, Int>
 
 object MoyuReminder : KotlinPlugin(
     JvmPluginDescription.loadFromResource()
 ) {
     private const val millisecondsPerDay = 1000L * 60 * 60 * 24
     private const val startUpDelay = 30000L
+
+    val templateRegex = Regex("(\\{.*?})")
 
     /**
      * 配置问价路径,不适用mirai的配置文件系统
@@ -150,9 +153,13 @@ object MoyuReminder : KotlinPlugin(
         }
     }
 
-    private class Worker(private val singleConfig: SingleConfig) : TimerTask() {
+    internal class Worker(private val singleConfig: SingleConfig) : TimerTask() {
 
         private val festivalDateList: List<FestivalDate> = singleConfig.festivalList.map(Festival::toFestivalDate)
+
+        companion object {
+            private val dayOfWeekList = listOf("周一", "周二", "周三", "周四", "周五", "周六", "周日")
+        }
 
         /**
          * The action to be performed by this timer task.
@@ -162,38 +169,30 @@ object MoyuReminder : KotlinPlugin(
                 LocalDate(year, month, dayOfMonth)
             }
 
-            /**
-             * 计算与当前时间的差值(单位为天)
-             */
-            fun FestivalDate.calcDelta(): Int {
-                return currentDate.daysUntil(this.time)
-            }
-            //与周末的差值
-            val diffToWeekend = with(JVMDayOfWeek.SATURDAY.value - currentDate.dayOfWeek.value) {
-                //处理周日的情况
-                max(this, 0)
-            }
-            //与节假日的时间差
-            val festivalDiffList = mutableListOf<Pair<String, Int>>()
-            festivalDiffList.addAll(
-                festivalDateList.map {
-                    it.name to it.calcDelta()
+            val festivalToShowList = findAllFestivalsToShow(currentDate)
+            val mainContent = parseMainContent(festivalToShowList)
+            val stringToSend = singleConfig.template.parseTemplate {
+                //大小写不敏感
+                when (it) {
+                    "{content}" -> {
+                        mainContent
+                    }
+                    "{month}" -> {
+                        currentDate.monthNumber.toString()
+                    }
+                    "{dayOfMonth}" -> {
+                        currentDate.dayOfMonth.toString()
+                    }
+                    "{dayOfWeek}" -> {
+                        dayOfWeekList[currentDate.dayOfWeek.ordinal]
+                    }
+                    "{dayOfYear}" -> {
+                        currentDate.dayOfYear.toString()
+                    }
+                    else -> {
+                        it
+                    }
                 }
-            )
-            festivalDiffList.add("周末" to diffToWeekend)
-            //排序.筛选
-            val targetFestivalList = festivalDiffList.filter {
-                it.second in -singleConfig.maxNumOfDaysExceed..singleConfig.maxNumOfDaysPrior
-            }.sortedBy {
-                it.second
-            }
-            val stringToSend = buildString {
-                append("【摸鱼办】提醒您：${currentDate.monthNumber}月${currentDate.dayOfMonth}日上午好，摸鱼人！工作再累，一定不要忘记摸鱼哦！有事没事起身去茶水间，去厕所，去廊道走走别老在工位上坐着，钱是老板的,但命是自己的")
-                append("\n")
-                targetFestivalList.forEach {
-                    append("距${it.first}还有:${it.second}天\n")
-                }
-                append("上班是帮老板赚钱，摸鱼是赚老板的钱！最后，祝愿天下所有摸鱼人，都能愉快的渡过每一天")
             }
             //使用获取到的第一个bot实例发送
             coroutineScope.launch {
@@ -209,6 +208,65 @@ object MoyuReminder : KotlinPlugin(
                     }
                 }
             }
+        }
+
+        private fun findAllFestivalsToShow(currentDate: LocalDate): List<FestivalDeltaInfo> {
+            /**
+             * 计算与当前时间的差值(单位为天)
+             */
+            fun FestivalDate.calcDelta(): Int {
+                var diff = currentDate.daysUntil(this.time)
+                //处理已过去的节日,阈值为max(-1.5*maxNumOfDaysExceed+1,-90)
+                if (diff < max((-1.5 * singleConfig.maxNumOfDaysExceed + 1).toInt(), -90)) {
+                    diff = currentDate.daysUntil(this.time.plus(DatePeriod(years = 1)))
+                }
+                return diff
+            }
+            //与周末的差值
+            val diffToWeekend = with(JVMDayOfWeek.SATURDAY.value - currentDate.dayOfWeek.value) {
+                //处理周日的情况
+                max(this, 0)
+            }
+            //与节假日的时间差
+            val festivalDiffList = mutableListOf<Pair<String, Int>>()
+            festivalDiffList.addAll(
+                festivalDateList.map {
+                    it.name to it.calcDelta()
+                }
+            )
+            festivalDiffList.add("周末" to diffToWeekend)
+            //排序.筛选
+            return festivalDiffList.filter {
+                it.second in -singleConfig.maxNumOfDaysExceed..singleConfig.maxNumOfDaysPrior
+            }.sortedBy {
+                it.second
+            }
+        }
+
+        private fun parseMainContent(festivalToShowList: List<FestivalDeltaInfo>): String {
+            return buildString {
+                festivalToShowList.forEach {
+                    append("距${it.first}还有:${it.second}天\n")
+                }
+            }
+        }
+
+        private inline fun String.parseTemplate(
+            crossinline handler: (name: String) -> String
+        ): String {
+            var lastIndex = 0
+            val stringBuilder = StringBuilder()
+            for (result in templateRegex.findAll(this)) {
+                if (result.range.first != lastIndex) {
+                    stringBuilder.append(this.substring(lastIndex, result.range.first))
+                }
+                lastIndex = result.range.last + 1
+                stringBuilder.append(handler(result.value))
+            }
+            if (lastIndex != this.length) {
+                stringBuilder.append(handler(substring(lastIndex, this.length)))
+            }
+            return stringBuilder.toString()
         }
     }
 }

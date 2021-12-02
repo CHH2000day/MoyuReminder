@@ -38,6 +38,7 @@ data class SingleConfig(
     val groupList: List<Long>,
     val festivalList: List<Festival>,
     val sendTime: String,
+    val template: String = "{content}",
     val maxNumOfDaysExceed: Int = 0,
     val maxNumOfDaysPrior: Int = 300,
     val interval: Long = 3000
