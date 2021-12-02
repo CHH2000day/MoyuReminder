@@ -31,8 +31,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
-
+tasks.test {
+    useJUnitPlatform()
+}
 afterEvaluate {
     //写入插件信息
     val pluginConfigFile = File("src/main/resources/plugin.yml")
